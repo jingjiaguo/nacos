@@ -46,9 +46,11 @@ public class TaskDispatcher {
 
     private List<TaskScheduler> taskSchedulerList = new ArrayList<>();
 
+    private final int cpuCoreCount = Runtime.getRuntime().availableProcessors();
+
     @PostConstruct
     public void init() {
-        for (int i = 0; i < partitionConfig.getTaskDispatchThreadCount(); i++) {
+        for (int i = 0; i < cpuCoreCount; i++) {
             TaskScheduler taskScheduler = new TaskScheduler(i);
             taskSchedulerList.add(taskScheduler);
             GlobalExecutor.submitTaskDispatch(taskScheduler);
@@ -56,7 +58,7 @@ public class TaskDispatcher {
     }
 
     public void addTask(String key) {
-        taskSchedulerList.get(UtilsAndCommons.shakeUp(key, partitionConfig.getTaskDispatchThreadCount())).addTask(key);
+        taskSchedulerList.get(UtilsAndCommons.shakeUp(key, cpuCoreCount)).addTask(key);
     }
 
     public class TaskScheduler implements Runnable {
